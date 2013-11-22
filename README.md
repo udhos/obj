@@ -55,9 +55,25 @@ void handleLib(String libString) {
 HttpRequest.getString(libURL)
   .then(handleLib)
   .catchError((err) { print("failure fetching mtllib: $libURL: $err"); });    
-``` 
+```
 
-3\. Scanning OBJ's Part list
+3\. Creating WebGL buffers from OBJ data
+
+```
+  Buffer vertexIndexBuffer = gl.createBuffer();
+  gl.bindBuffer(RenderingContext.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
+  gl.bufferDataTyped(RenderingContext.ELEMENT_ARRAY_BUFFER, new Uint16List.fromList(obj.indices), RenderingContext.STATIC_DRAW);
+
+  Buffer vertexPositionBuffer = gl.createBuffer();
+  gl.bindBuffer(RenderingContext.ARRAY_BUFFER, vertexPositionBuffer);
+  gl.bufferDataTyped(RenderingContext.ARRAY_BUFFER, new Float32List.fromList(obj.vertCoord), RenderingContext.STATIC_DRAW);   
+
+  Buffer textureCoordBuffer = gl.createBuffer();
+  gl.bindBuffer(RenderingContext.ARRAY_BUFFER, textureCoordBuffer);
+  gl.bufferDataTyped(RenderingContext.ARRAY_BUFFER, new Float32List.fromList(obj.textCoord), RenderingContext.STATIC_DRAW);
+```
+
+4\. Scanning OBJ's Part list
 
 ```
 obj.partList.forEach((pa) {
