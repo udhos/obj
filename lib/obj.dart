@@ -265,7 +265,7 @@ class Obj {
     
     // FIXME
     if (textCoord.length == 0) {
-      print("OBJ: FIXME: adding ${indices.length} virtual texture coordinates");
+      print("OBJ: FIXME: url=$url adding ${indices.length} virtual texture coordinates");
       for (int i = 0; i < indices.length; ++i) {
         textCoord.add(0.0); // u
         textCoord.add(0.0); // v        

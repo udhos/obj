@@ -1,5 +1,5 @@
 name: obj
-version: 0.0.1
 author: Everton Marques <everton.marques@gmail.com>
-description: OBJ parser for Dart
+version: 0.0.2
 homepage: https://github.com/udhos/obj
+description: OBJ parser for Dart
