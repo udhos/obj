@@ -78,6 +78,7 @@ class Obj {
     int indexCounter = 0;
     int lineNum = 0;
     Part currObj;
+    String curr_usemtl;
     
     void parseLine(String rawLine) {
       ++lineNum;
@@ -101,6 +102,15 @@ class Obj {
         }
         mtllib = new_mtllib;
         return;
+      }
+      
+      if (line.startsWith(prefix_usemtl)) {
+        String new_usemtl = line.substring(prefix_usemtl_len);
+        if (currObj != null) {
+          currObj.usemtl = new_usemtl;
+        }
+        curr_usemtl = new_usemtl;
+        return;
       }      
       
       if (line.startsWith('o ') || line.startsWith('g ')) {
@@ -112,6 +122,9 @@ class Obj {
         }
         else {
           print("OBJ: redefining object $objName at line=$lineNum from url=$url: [$line]");          
+        }
+        if (curr_usemtl != null) {
+          currObj.usemtl = curr_usemtl;
         }
         return;
       }
@@ -180,20 +193,14 @@ class Obj {
       
       if (line.startsWith("f ")) {
         // face
-        List<String> f = line.split(' ');
-        if (f.length != 4) {
-          print("OBJ: wrong number of face indices (${f.length - 1} != 3) at line=$lineNum from url=$url: [$line]");
-          return;
-        }
-        for (int i = 1; i < f.length; ++i) {
-          String ind = f[i];
-          
+        
+        void addVertex(String ind) {
           // known unified index?
           int index = indexTable[ind];
           if (index != null) {
             indices.add(index);
             currObj.indexListSize++;
-            continue;
+            return;
           }
           
           List<String> v = ind.split('/');
@@ -233,11 +240,39 @@ class Obj {
           indices.add(indexCounter);
           currObj.indexListSize++;
           indexTable[ind] = indexCounter;      
-          ++indexCounter;
+          ++indexCounter;          
         }
+
+        List<String> f = line.split(' ');
+
+        if (f.length == 4) {
+          // triangle face: v0 v1 v2
+          for (int i = 1; i < f.length; ++i) {
+            addVertex(f[i]);
+          }
+          return;
+        }
+
+        if (f.length == 5) {
+          // quad face:
+          // v0 v1 v2 v3 =>
+          // v0 v1 v2
+          // v2 v3 v0
+          for (int i = 1; i < 4; ++i) {
+            addVertex(f[i]);
+          }
+          addVertex(f[3]);
+          addVertex(f[4]);
+          addVertex(f[1]);
+          return;
+        }
+
+        print("OBJ: wrong number of face indices ${f.length - 1} at line=$lineNum from url=$url: [$line]");
+
         return;
       }
-      
+
+      /*
       if (line.startsWith(prefix_usemtl)) {
         String new_usemtl = line.substring(prefix_usemtl_len);
         if (currObj.usemtl != null) {
@@ -246,6 +281,7 @@ class Obj {
         currObj.usemtl = new_usemtl;
         return;
       }
+      */
       
       print("OBJ: unknown pattern at line=$lineNum from url=$url: [$line]");
     }
