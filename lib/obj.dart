@@ -103,7 +103,7 @@ class Obj {
         return;
       }      
       
-      if (line.startsWith('o ')) {
+      if (line.startsWith('o ') || line.startsWith('g ')) {
         String objName = line.substring(2);
         currObj = _partTable[objName];
         if (currObj == null) {
@@ -244,11 +244,6 @@ class Obj {
           print("OBJ: object=${currObj.name} usemtl redefinition: from usemtl=${currObj.usemtl} to usemtl=$new_usemtl");          
         }
         currObj.usemtl = new_usemtl;
-        return;
-      }
-
-      if (line.startsWith("g ")) {
-        // ignore
         return;
       }
       
