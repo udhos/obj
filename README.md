@@ -44,7 +44,7 @@ HttpRequest.getString(objURL)
 
 ```
 // libURL is an optional URL for issuing the lib location on error messages
-// materialString is a string containing the MTLLIB text
+// libString is a string containing the MTLLIB text
 	
 String libURL = "http://some.example.com/path/to/lib.mtl";
 	
