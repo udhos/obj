@@ -67,7 +67,7 @@ class Obj {
     */
   }
 
-  Obj.fromString(String url, String str, {bool debugPrintParts: false}) {
+  Obj.fromString(String url, String str, {bool printStats: false, bool debugPrintParts: false}) {
 
     Map<String, int> indexTable = new Map<String, int>();
     List<double> _vertCoord = new List<double>();
@@ -299,20 +299,22 @@ class Obj {
       }
     }
 
-    print("Obj.fromString: URL=$url vertices = $indexCounter");
-    print("Obj.fromString: URL=$url indices.length = ${indices.length}");
-    print("Obj.fromString: URL=$url vertCoord.length = ${vertCoord.length} (3 * $indexCounter)");
-    print("Obj.fromString: URL=$url textCoord.length = ${textCoord.length} (2 * $indexCounter)");
-    print("Obj.fromString: URL=$url normCoord.length = ${normCoord.length} (3 * $indexCounter)");
+    if (printStats) {
+      print("Obj.fromString: URL=$url vertices = $indexCounter");
+      print("Obj.fromString: URL=$url indices.length = ${indices.length}");
+      print("Obj.fromString: URL=$url vertCoord.length = ${vertCoord.length} (3 * $indexCounter)");
+      print("Obj.fromString: URL=$url textCoord.length = ${textCoord.length} (2 * $indexCounter)");
+      print("Obj.fromString: URL=$url normCoord.length = ${normCoord.length} (3 * $indexCounter)");
 
-    if (indices.length < 100) {
-      print("Obj.fromString: URL=$url indices = ${indices}");
-      print("Obj.fromString: URL=$url vertCoord = ${vertCoord}");
-      print("Obj.fromString: URL=$url textCoord = ${textCoord}");
-      print("Obj.fromString: URL=$url normCoord = ${normCoord}");
+      if (indices.length < 100) {
+        print("Obj.fromString: URL=$url indices = ${indices}");
+        print("Obj.fromString: URL=$url vertCoord = ${vertCoord}");
+        print("Obj.fromString: URL=$url textCoord = ${textCoord}");
+        print("Obj.fromString: URL=$url normCoord = ${normCoord}");
+      }
+
+      print("Obj.fromString: URL=$url parts = ${_partTable.length}");
     }
-    
-    print("Obj.fromString: URL=$url parts = ${_partTable.length}");
 
     if (debugPrintParts) {
       _partTable.values.forEach((Part pa) {
