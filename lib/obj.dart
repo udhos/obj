@@ -67,7 +67,7 @@ class Obj {
     */
   }
 
-  Obj.fromString(String url, String str, {bool printStats: false, bool debugPrintParts: false}) {
+  Obj.fromString(String url, String str, {bool printStats: false, bool debugPrintParts: false, String defaultName: null}) {
 
     Map<String, int> indexTable = new Map<String, int>();
     List<double> _vertCoord = new List<double>();
@@ -110,24 +110,32 @@ class Obj {
         curr_usemtl = new_usemtl;
         return;
       }
-
-      if (line.startsWith('o ') || line.startsWith('g ')) {
-        String objName = line.substring(2);
-        currObj = _partTable[objName];
+      
+      void _setCurrentObject(String name, int num, String u, String ln) {
+        currObj = _partTable[name];
         if (currObj == null) {
-          currObj = new Part(objName, indices.length);
-          _partTable[objName] = currObj;
+          currObj = new Part(name, indices.length);
+          _partTable[name] = currObj;
         } else {
-          print("OBJ: redefining object $objName at line=$lineNum from url=$url: [$line]");
+          print("OBJ: redefining object $name at line=$num from url=$u: [$ln]");
         }
         if (curr_usemtl != null) {
           currObj.usemtl = curr_usemtl;
-        }
+        }        
+      }
+
+      if (line.startsWith('o ') || line.startsWith('g ')) {
+        String objName = line.substring(2);
+        _setCurrentObject(objName, lineNum, url, line);
         return;
       }
 
       if (currObj == null) {
-        print("OBJ: non-object pattern at line=$lineNum from url=$url: [$line]");
+        if (defaultName != null) {
+          _setCurrentObject(defaultName, lineNum, url, line);
+        } else {
+          print("OBJ: non-object pattern at line=$lineNum from url=$url: [$line]");
+        }
         return;
       }
 
