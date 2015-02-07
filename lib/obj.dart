@@ -10,6 +10,8 @@ class Part {
   Part(this.name, this.indexFirst);
 }
 
+RegExp _BLANK = new RegExp(r"\s+");
+
 class Obj {
 
   static final String prefix_mtllib = "mtllib ";
@@ -67,7 +69,7 @@ class Obj {
     */
   }
 
-  Obj.fromString(String url, String str, {bool printStats: false, bool debugPrintParts: false, String defaultName: null}) {
+  Obj.fromString(String url, String str, {bool printStats: false, bool debugPrintParts: false, String defaultName: null, debugPrintTrace: false}) {
 
     Map<String, int> indexTable = new Map<String, int>();
     List<double> _vertCoord = new List<double>();
@@ -81,7 +83,7 @@ class Obj {
     void parseLine(String rawLine) {
       ++lineNum;
 
-      //print("line: $lineNum [$rawLine]");
+      //print("line: $lineNum url=$url [$rawLine]");
 
       String line = rawLine.trim();
 
@@ -108,9 +110,12 @@ class Obj {
           currObj.usemtl = new_usemtl;
         }
         curr_usemtl = new_usemtl;
+        if (debugPrintTrace) {
+          print("Obj.fromString: url=$url usemtl=$curr_usemtl");
+        }
         return;
       }
-      
+
       void _setCurrentObject(String name, int num, String u, String ln) {
         currObj = _partTable[name];
         if (currObj == null) {
@@ -121,7 +126,7 @@ class Obj {
         }
         if (curr_usemtl != null) {
           currObj.usemtl = curr_usemtl;
-        }        
+        }
       }
 
       if (line.startsWith('o ') || line.startsWith('g ')) {
@@ -149,9 +154,10 @@ class Obj {
         return;
       }
 
+      /*
       if (line.startsWith("v ")) {
         // vertex coord
-        List<String> v = line.split(' ');
+        List<String> v = line.split(_BLANK);
         if (v.length == 4) {
           _vertCoord.add(double.parse(v[1])); // x
           _vertCoord.add(double.parse(v[2])); // y
@@ -169,22 +175,41 @@ class Obj {
         print("OBJ: wrong number of vertex coordinates: ${v.length - 1} at line=$lineNum from url=$url: [$line]");
         return;
       }
+       */
+      if (line.startsWith("v ")) {
+        // vertex coord
+        return;
+      }
 
       if (line.startsWith("vt ")) {
         // texture coord
-        List<String> t = line.split(' ');
-        if (t.length != 3) {
-          print("OBJ: wrong number of texture coordinates (${t.length - 1} != 2) at line=$lineNum from url=$url: [$line]");
+        List<String> t = line.split(_BLANK);
+        if (t.length == 3) {
+          _textCoord.add(double.parse(t[1])); // u
+          _textCoord.add(double.parse(t[2])); // v
           return;
         }
-        _textCoord.add(double.parse(t[1])); // u
-        _textCoord.add(double.parse(t[2])); // v
+        if (t.length == 4) {
+          double u = double.parse(t[1]);
+          double v = double.parse(t[2]);
+          double w = double.parse(t[3]);
+
+          if (w != 0.0) {
+            print("OBJ: non-zero third texture coordinate: $w at line=$lineNum from url=$url: [$line]");
+            return;
+          }
+
+          _textCoord.add(u); // u
+          _textCoord.add(v); // v
+          return;
+        }
+        print("OBJ: wrong number of texture coordinates: ${t.length - 1} at line=$lineNum from url=$url: [$line]");
         return;
       }
 
       if (line.startsWith("vn ")) {
         // normal
-        List<String> n = line.split(' ');
+        List<String> n = line.split(_BLANK);
         if (n.length != 4) {
           print("OBJ: wrong number of normal coordinates (${n.length - 1} != 3) at line=$lineNum from url=$url: [$line]");
           return;
@@ -199,6 +224,7 @@ class Obj {
         // face
 
         void addVertex(String ind) {
+
           // known unified index?
           int index = indexTable[ind];
           if (index != null) {
@@ -213,6 +239,9 @@ class Obj {
           String vi = v[0];
           int vIndex = int.parse(vi) - 1;
           int vOffset = 3 * vIndex;
+
+          //print("addVertex: ind=[$ind] vOffset=$vOffset\n");
+
           vertCoord.add(_vertCoord[vOffset + 0]); // x
           vertCoord.add(_vertCoord[vOffset + 1]); // y
           vertCoord.add(_vertCoord[vOffset + 2]); // z
@@ -247,7 +276,7 @@ class Obj {
           ++indexCounter;
         }
 
-        List<String> f = line.split(' ');
+        List<String> f = line.split(_BLANK);
 
         if (f.length == 4) {
           // triangle face: v0 v1 v2
@@ -290,7 +319,51 @@ class Obj {
       print("OBJ: unknown pattern at line=$lineNum from url=$url: [$line]");
     }
 
+    void parseOnlyVertexLine(String rawLine) {
+      ++lineNum;
+
+      //print("line: $lineNum url=$url [$rawLine]");
+
+      String line = rawLine.trim();
+
+      if (line.isEmpty) {
+        return;
+      }
+
+      if (line[0] == '#') {
+        return;
+      }
+
+      if (line.startsWith("v ")) {
+        // vertex coord
+        List<String> v = line.split(_BLANK);
+        if (v.length == 4) {
+          _vertCoord.add(double.parse(v[1])); // x
+          _vertCoord.add(double.parse(v[2])); // y
+          _vertCoord.add(double.parse(v[3])); // z
+          return;
+        }
+        if (v.length == 5) {
+          double w = double.parse(v[4]);
+          _vertCoord.add(double.parse(v[1]) / w); // x
+          _vertCoord.add(double.parse(v[2]) / w); // y
+          _vertCoord.add(double.parse(v[3]) / w); // z
+          return;
+        }
+
+        print("OBJ: wrong number of vertex coordinates: ${v.length - 1} at line=$lineNum from url=$url: [$line]");
+        return;
+      }
+
+    }
+
     List<String> lines = str.split('\n');
+
+    lines.forEach((line) => parseOnlyVertexLine(line));
+
+    lineNum = 0;
+    currObj = null;
+    curr_usemtl = null;
 
     lines.forEach((line) => parseLine(line));
 
@@ -353,12 +426,15 @@ Map<String, Material> mtllib_parse(String str, String url) {
   Map<String, Material> lib = new Map<String, Material>();
   Material currMaterial;
 
-  void _parse_newmtl(String field, String param, String line, int lineNum, String url) {
+  void _parse_newmtl(String field, String param, String line, int lineNum, String url, {bool debugPrintTrace: false}) {
     String mtl = param;
     currMaterial = lib[mtl];
     if (currMaterial == null) {
       currMaterial = new Material(mtl);
       lib[mtl] = currMaterial;
+    }
+    if (debugPrintTrace) {
+      print("mtllib_parse: url=$url: newmtl=$mtl");
     }
   }
 
@@ -377,7 +453,7 @@ Map<String, Material> mtllib_parse(String str, String url) {
       print("mtllib_parse: url=$url: line=$lineNum: Kd=$Kd found for undefined material: [$line]");
       return;
     }
-    List<String> rgb = Kd.split(' ');
+    List<String> rgb = Kd.split(_BLANK);
     currMaterial.Kd[0] = double.parse(rgb[0]);
     currMaterial.Kd[1] = double.parse(rgb[1]);
     currMaterial.Kd[2] = double.parse(rgb[2]);
