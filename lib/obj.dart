@@ -386,8 +386,12 @@ class Obj {
       print("Obj.fromString: URL=$url vertCoord.length = ${vertCoord.length} (3 * $indexCounter)");
       print("Obj.fromString: URL=$url textCoord.length = ${textCoord.length} (2 * $indexCounter)");
       print("Obj.fromString: URL=$url normCoord.length = ${normCoord.length} (3 * $indexCounter)");
+      
+      int maxIndices = 100;
+      
+      print("Obj.fromString: URL=$url printing arrays only for objects with less than $maxIndices indices");
 
-      if (indices.length < 100) {
+      if (indices.length < maxIndices) {
         print("Obj.fromString: URL=$url indices = ${indices}");
         print("Obj.fromString: URL=$url vertCoord = ${vertCoord}");
         print("Obj.fromString: URL=$url textCoord = ${textCoord}");
