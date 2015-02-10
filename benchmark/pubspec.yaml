@@ -1,7 +1,0 @@
-name: benchmark
-description: OBJ Lib Benchmark
-dependencies:
-  benchmark_harness: any
-  obj:    
-    path: c:/tmp/devel/obj
-  
