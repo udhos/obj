@@ -70,7 +70,7 @@ class Obj {
     */
   }
 
-  Obj.fromString(String url, String str, {bool printStats: false, bool debugPrintParts: false, String defaultName: null, bool debugPrintTrace: false}) {
+  Obj.fromString(String url, String str, {bool printStats: false, bool debugPrintParts: false, String defaultName: null, bool debugPrintTrace: false, bool fillMissingTextCoord: false}) {
 
     Map<String, int> indexTable = new Map<String, int>();
     List<double> _vertCoord = new List<double>();
@@ -376,10 +376,12 @@ class Obj {
     int textCoordNeeded = indexCounter * 2;
     if (textCoord.length < textCoordNeeded) {
       textCoordFound = false; // mark real texture coordinates as missing
-      print("OBJ: FIXME: url=$url adding ${textCoordNeeded - textCoord.length} virtual texture coordinates");
-      while (textCoord.length < textCoordNeeded) {
-        textCoord.add(0.0); // u
-        textCoord.add(0.0); // v
+      if (fillMissingTextCoord) {
+        print("OBJ: FIXME: url=$url adding ${textCoordNeeded - textCoord.length} virtual texture coordinates");
+        while (textCoord.length < textCoordNeeded) {
+          textCoord.add(0.0); // u
+          textCoord.add(0.0); // v
+        }
       }
     }
 
@@ -390,9 +392,9 @@ class Obj {
       print("Obj.fromString: URL=$url textCoordFound = $textCoordFound");
       print("Obj.fromString: URL=$url textCoord.length = ${textCoord.length} (2 * $indexCounter)");
       print("Obj.fromString: URL=$url normCoord.length = ${normCoord.length} (3 * $indexCounter)");
-      
+
       int maxIndices = 100;
-      
+
       print("Obj.fromString: URL=$url printing arrays only for objects with less than $maxIndices indices");
 
       if (indices.length < maxIndices) {
@@ -429,7 +431,7 @@ class Material {
 
 typedef void field_parser(String field, String param, String line, int lineNum, String url);
 
-Map<String, Material> mtllib_parse(String str, String url, { printUnknownFields: true }) {
+Map<String, Material> mtllib_parse(String str, String url, {printUnknownFields: true}) {
 
   Map<String, Material> lib = new Map<String, Material>();
   Material currMaterial;
@@ -509,7 +511,7 @@ Map<String, Material> mtllib_parse(String str, String url, { printUnknownFields:
     field_parser parser = parserTable[field];
     if (parser == null) {
       if (printUnknownFields) {
-      print("mtllib_parse: unknown field=[$field] on line=$lineNum from url=$url: [$line]");
+        print("mtllib_parse: unknown field=[$field] on line=$lineNum from url=$url: [$line]");
       }
       return;
     }
