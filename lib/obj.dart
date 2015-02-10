@@ -425,7 +425,7 @@ class Material {
 
 typedef void field_parser(String field, String param, String line, int lineNum, String url);
 
-Map<String, Material> mtllib_parse(String str, String url) {
+Map<String, Material> mtllib_parse(String str, String url, { printUnknownFields: true }) {
 
   Map<String, Material> lib = new Map<String, Material>();
   Material currMaterial;
@@ -504,7 +504,9 @@ Map<String, Material> mtllib_parse(String str, String url) {
     String param = line.substring(paramIndex).trim();
     field_parser parser = parserTable[field];
     if (parser == null) {
+      if (printUnknownFields) {
       print("mtllib_parse: unknown field=[$field] on line=$lineNum from url=$url: [$line]");
+      }
       return;
     }
 
