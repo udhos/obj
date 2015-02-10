@@ -23,6 +23,7 @@ class Obj {
 
   Iterable<Part> get partList => _partTable.values;
 
+  bool textCoordFound = true;
   List<double> vertCoord = new List<double>();
   List<double> textCoord = new List<double>();
   List<double> normCoord = new List<double>();
@@ -69,7 +70,7 @@ class Obj {
     */
   }
 
-  Obj.fromString(String url, String str, {bool printStats: false, bool debugPrintParts: false, String defaultName: null, debugPrintTrace: false}) {
+  Obj.fromString(String url, String str, {bool printStats: false, bool debugPrintParts: false, String defaultName: null, bool debugPrintTrace: false}) {
 
     Map<String, int> indexTable = new Map<String, int>();
     List<double> _vertCoord = new List<double>();
@@ -372,9 +373,11 @@ class Obj {
     trimTable(url); // remove empty objects from _partTable
 
     // FIXME
-    if (textCoord.length == 0) {
-      print("OBJ: FIXME: url=$url adding ${indices.length} virtual texture coordinates");
-      for (int i = 0; i < indexCounter; ++i) {
+    int textCoordNeeded = indexCounter * 2;
+    if (textCoord.length < textCoordNeeded) {
+      textCoordFound = false; // mark real texture coordinates as missing
+      print("OBJ: FIXME: url=$url adding ${textCoordNeeded - textCoord.length} virtual texture coordinates");
+      while (textCoord.length < textCoordNeeded) {
         textCoord.add(0.0); // u
         textCoord.add(0.0); // v
       }
@@ -383,7 +386,8 @@ class Obj {
     if (printStats) {
       print("Obj.fromString: URL=$url vertices = $indexCounter");
       print("Obj.fromString: URL=$url indices.length = ${indices.length}");
-      print("Obj.fromString: URL=$url vertCoord.length = ${vertCoord.length} (3 * $indexCounter)");
+      print("Obj.fromString: URL=$url indices.length = ${indices.length}");
+      print("Obj.fromString: URL=$url textCoordFound = $textCoordFound");
       print("Obj.fromString: URL=$url textCoord.length = ${textCoord.length} (2 * $indexCounter)");
       print("Obj.fromString: URL=$url normCoord.length = ${normCoord.length} (3 * $indexCounter)");
       
