@@ -74,7 +74,7 @@ void fetchObj(String URL) {
   done(MUSTANG_OBJ_STR);
 }
 
-void main() { 
+void main() {
   //fetchObj("C:/tmp/devel/negentropia/wwwroot/obj/Colony Ship Ogame Fleet.obj");
   fetchObj("mustang_impala.obj");
 }
