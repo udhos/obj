@@ -1,8 +1,6 @@
-/*
 import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
- */
 
 import 'package:benchmark_harness/benchmark_harness.dart';
 import 'package:obj/obj.dart';
@@ -13,6 +11,10 @@ String objURL;
 String objString;
 String mtlURL;
 String mtlString;
+
+void log(String msg) {
+  print("** $msg");
+}
 
 class ParseObjBenchmark extends BenchmarkBase {
   const ParseObjBenchmark() : super("ParseObjBenchmark: Obj.fromString");
@@ -42,39 +44,72 @@ void fetchMtl(String URL) {
   void done(String response) {
     mtlURL = URL;
     mtlString = response;
+    
+    log("mtl file loaded: $URL");
+    
+    log("parsing mtl file: $URL");
+    
     ParseMtlBenchmark.main(); // run benchmark
   }
 
-  /*
+  log("loading mtl file: $URL");
+  
   var file = new File(URL);
   Future<String> finishedReading = file.readAsString(encoding: ASCII);
   finishedReading.then(done);
-   */
+}
+
+void fetchObj(String oURL, String mURL) {
+  void done(String response) {
+    objURL = oURL;
+    objString = response;
+
+    log("obj file loaded: $oURL");
+
+    fetchMtl(mURL);
+
+    log("parsing obj file: $oURL");
+    
+    ParseObjBenchmark.main(); // run benchmark    
+  }
+
+  log("loading obj file: $oURL");
+  
+  var file = new File(oURL);
+  Future<String> finishedReading = file.readAsString(encoding: ASCII);
+  finishedReading.then(done);
+}
+
+void loadMtl(String URL) {
+  void done(String response) {
+    mtlURL = URL;
+    mtlString = response;
+    
+    log("parsing mtl: $URL");
+    
+    ParseMtlBenchmark.main(); // run benchmark
+  }
+
   done(MUSTANG_MTL_STR);
 }
 
-void fetchObj(String URL) {
+void loadObj(String URL) {
   void done(String response) {
     objURL = URL;
     objString = response;
-    ParseObjBenchmark.main(); // run benchmark
-
-    /*
-    fetchMtl(
-        "C:/tmp/devel/negentropia/wwwroot/mtl/Colony Ship Ogame Fleet.mtl");
-         */
-    fetchMtl("mustang_impala.mtl");
+    
+    loadMtl("mustang_impala.mtl");
+    
+    log("parsing obj: $URL");
+    
+    ParseObjBenchmark.main(); // run benchmark    
   }
 
-  /*
-  var file = new File(URL);
-  Future<String> finishedReading = file.readAsString(encoding: ASCII);
-  finishedReading.then(done);
-   */
   done(MUSTANG_OBJ_STR);
 }
 
 void main() {
-  //fetchObj("C:/tmp/devel/negentropia/wwwroot/obj/Colony Ship Ogame Fleet.obj");
-  fetchObj("mustang_impala.obj");
+  log("current directory: ${Directory.current}");
+  loadObj("mustang_impala.obj"); // loadObj: hard-coded obj
+  fetchObj("benchmark/house.obj", "benchmark/house.mtl"); // fetchOBJ: grab obj from file
 }

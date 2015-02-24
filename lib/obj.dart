@@ -235,11 +235,26 @@ class Obj {
           }
 
           List<String> v = ind.split('/');
+          
+          int solveRelativeIndex(int index, int tupleSize, int arraySize) {
+            int offset;
+            
+            if (index > 0) {
+              // positive index
+              offset = tupleSize * (index - 1);
+            }
+            else {
+              // negative index (starts from end)
+              offset = arraySize + tupleSize * index;
+            }
+            
+            return offset;
+          }
 
           // coord index
           String vi = v[0];
-          int vIndex = int.parse(vi) - 1;
-          int vOffset = 3 * vIndex;
+          int vIndex = int.parse(vi);
+          int vOffset = solveRelativeIndex(vIndex, 3, _vertCoord.length);
 
           //print("addVertex: ind=[$ind] vOffset=$vOffset\n");
 
@@ -251,8 +266,8 @@ class Obj {
             // texture index?
             String ti = v[1];
             if (ti != null && !ti.isEmpty) {
-              int tIndex = int.parse(ti) - 1;
-              int tOffset = 2 * tIndex;
+              int tIndex = int.parse(ti);
+              int tOffset = solveRelativeIndex(tIndex, 2, _textCoord.length);
               textCoord.add(_textCoord[tOffset + 0]); // u
               textCoord.add(_textCoord[tOffset + 1]); // v
             }
@@ -262,8 +277,8 @@ class Obj {
             // normal index?
             String ni = v[2];
             if (ni != null && !ni.isEmpty) {
-              int nIndex = int.parse(ni) - 1;
-              int nOffset = 3 * nIndex;
+              int nIndex = int.parse(ni);
+              int nOffset = solveRelativeIndex(nIndex, 3, _normCoord.length);              
               normCoord.add(_normCoord[nOffset + 0]); // x
               normCoord.add(_normCoord[nOffset + 1]); // y
               normCoord.add(_normCoord[nOffset + 2]); // z
