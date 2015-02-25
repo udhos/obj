@@ -81,21 +81,49 @@ class Obj {
     int lineNum = 0;
     Part currObj;
     String curr_usemtl;
+    bool withinComment = false;
 
-    void parseLine(String rawLine) {
+    bool _isForcedCommentBegin(String line) {
+      return line.startsWith("## comment-begin ##");
+    }
+
+    bool _isForcedCommentEnd(String line) {
+      return line.startsWith("## comment-end ##");
+    }
+
+    bool _isForcedEof(String line, int num) {
+      bool eof = line.startsWith("## end-of-file ##");
+      if (eof) print(
+          "Obj.fromString: URL=$url forced EOF at line=$num: [$line]");
+      return eof;
+    }
+
+    bool parseLine(String rawLine) {
       ++lineNum;
 
       //print("line: $lineNum url=$url [$rawLine]");
 
       String line = rawLine.trim();
 
-      if (line.isEmpty) {
-        return;
+      if (_isForcedCommentEnd(line)) {
+        withinComment = false;
+        return false;
       }
 
-      if (line[0] == '#') {
-        return;
+      if (_isForcedEof(line, lineNum)) {
+        return true;
       }
+
+      if (withinComment) {
+        return false;
+      }
+
+      if (_isForcedCommentBegin(line)) {
+        withinComment = true;
+        return false;
+      }
+
+      if (_trimmedLineIsComment(line)) return false;
 
       if (line.startsWith(prefix_mtllib)) {
         String new_mtllib = line.substring(prefix_mtllib_len);
@@ -104,7 +132,7 @@ class Obj {
               "OBJ: mtllib redefinition: from mtllib=$mtllib to mtllib=$new_mtllib");
         }
         mtllib = new_mtllib;
-        return;
+        return false;
       }
 
       if (line.startsWith(prefix_usemtl)) {
@@ -116,7 +144,7 @@ class Obj {
         if (debugPrintTrace) {
           print("Obj.fromString: url=$url usemtl=$curr_usemtl");
         }
-        return;
+        return false;
       }
 
       void _setCurrentObject(String name, int num, String u, String ln) {
@@ -135,7 +163,7 @@ class Obj {
       if (line.startsWith('o ') || line.startsWith('g ')) {
         String objName = line.substring(2);
         _setCurrentObject(objName, lineNum, url, line);
-        return;
+        return false;
       }
 
       if (currObj == null) {
@@ -145,7 +173,7 @@ class Obj {
           print(
               "OBJ: non-object pattern at line=$lineNum from url=$url: [$line]");
         }
-        return;
+        return false;
       }
 
       if (line.startsWith('s ')) {
@@ -155,7 +183,7 @@ class Obj {
         } else {
           currObj.smooth = true;
         }
-        return;
+        return false;
       }
 
       /*
@@ -182,7 +210,7 @@ class Obj {
        */
       if (line.startsWith("v ")) {
         // vertex coord
-        return;
+        return false;
       }
 
       if (line.startsWith("vt ")) {
@@ -191,7 +219,7 @@ class Obj {
         if (t.length == 3) {
           _textCoord.add(double.parse(t[1])); // u
           _textCoord.add(double.parse(t[2])); // v
-          return;
+          return false;
         }
         if (t.length == 4) {
           double u = double.parse(t[1]);
@@ -201,16 +229,16 @@ class Obj {
           if (w != 0.0) {
             print(
                 "OBJ: non-zero third texture coordinate: $w at line=$lineNum from url=$url: [$line]");
-            return;
+            return false;
           }
 
           _textCoord.add(u); // u
           _textCoord.add(v); // v
-          return;
+          return false;
         }
         print(
             "OBJ: wrong number of texture coordinates: ${t.length - 1} at line=$lineNum from url=$url: [$line]");
-        return;
+        return false;
       }
 
       if (line.startsWith("vn ")) {
@@ -219,12 +247,12 @@ class Obj {
         if (n.length != 4) {
           print(
               "OBJ: wrong number of normal coordinates (${n.length - 1} != 3) at line=$lineNum from url=$url: [$line]");
-          return;
+          return false;
         }
         _normCoord.add(double.parse(n[1])); // x
         _normCoord.add(double.parse(n[2])); // y
         _normCoord.add(double.parse(n[3])); // z
-        return;
+        return false;
       }
 
       if (line.startsWith("f ")) {
@@ -304,7 +332,7 @@ class Obj {
           for (int i = 1; i < f.length; ++i) {
             addVertex(f[i]);
           }
-          return;
+          return false;
         }
 
         if (f.length == 5) {
@@ -318,13 +346,13 @@ class Obj {
           addVertex(f[3]);
           addVertex(f[4]);
           addVertex(f[1]);
-          return;
+          return false;
         }
 
         print(
             "OBJ: wrong number of face indices ${f.length - 1} at line=$lineNum from url=$url: [$line]");
 
-        return;
+        return false;
       }
 
       /*
@@ -339,22 +367,18 @@ class Obj {
       */
 
       print("OBJ: unknown pattern at line=$lineNum from url=$url: [$line]");
+
+      return false;
     }
 
-    void parseOnlyVertexLine(String rawLine) {
+    bool parseOnlyVertexLine(String rawLine) {
       ++lineNum;
 
       //print("line: $lineNum url=$url [$rawLine]");
 
       String line = rawLine.trim();
 
-      if (line.isEmpty) {
-        return;
-      }
-
-      if (line[0] == '#') {
-        return;
-      }
+      if (_trimmedLineIsComment(line)) return false;
 
       if (line.startsWith("v ")) {
         // vertex coord
@@ -363,31 +387,46 @@ class Obj {
           _vertCoord.add(double.parse(v[1])); // x
           _vertCoord.add(double.parse(v[2])); // y
           _vertCoord.add(double.parse(v[3])); // z
-          return;
+          return false;
         }
         if (v.length == 5) {
           double w = double.parse(v[4]);
           _vertCoord.add(double.parse(v[1]) / w); // x
           _vertCoord.add(double.parse(v[2]) / w); // y
           _vertCoord.add(double.parse(v[3]) / w); // z
-          return;
+          return false;
         }
 
         print(
             "OBJ: wrong number of vertex coordinates: ${v.length - 1} at line=$lineNum from url=$url: [$line]");
-        return;
+        return false;
+      }
+
+      return false;
+    }
+
+    void _scanLines(List<String> lines) {
+
+      //lines.forEach((line) => parseOnlyVertexLine(line));
+      for (final line in lines) {
+        bool eof = parseOnlyVertexLine(line);
+        if (eof) return;
+      }
+
+      lineNum = 0;
+      currObj = null;
+      curr_usemtl = null;
+
+      //lines.forEach((line) => parseLine(line));
+      for (final line in lines) {
+        bool eof = parseLine(line);
+        if (eof) return;
       }
     }
 
     List<String> lines = str.split('\n');
 
-    lines.forEach((line) => parseOnlyVertexLine(line));
-
-    lineNum = 0;
-    currObj = null;
-    curr_usemtl = null;
-
-    lines.forEach((line) => parseLine(line));
+    _scanLines(lines);
 
     //print("Obj.fromString: url=$url: lines=${lines.length}");
 
@@ -521,11 +560,7 @@ Map<String, Material> mtllib_parse(String str, String url,
 
     String line = rawLine.trim();
 
-    if (line.isEmpty) {
-      return;
-    }
-
-    if (line[0] == '#') {
+    if (_trimmedLineIsComment(line)) {
       return;
     }
 
@@ -558,4 +593,9 @@ Map<String, Material> mtllib_parse(String str, String url,
   //lib.forEach((name, material) { print("mtllib_parse: url=$url material=$name: Kd=${material.Kd} map_Kd=${material.map_Kd}"); });
 
   return lib;
+}
+
+bool _trimmedLineIsComment(String line) {
+  assert(!line.startsWith(_BLANK));
+  return line.isEmpty || line[0] == '#';
 }
