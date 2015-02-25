@@ -36,7 +36,8 @@ class ParseMtlBenchmark extends BenchmarkBase {
   }
 
   void run() {
-    Map<String, Material> lib = mtllib_parse(mtlString, mtlURL, printUnknownFields: false);
+    Map<String, Material> lib =
+        mtllib_parse(mtlString, mtlURL, printUnknownFields: false);
   }
 }
 
@@ -44,16 +45,16 @@ void fetchMtl(String URL) {
   void done(String response) {
     mtlURL = URL;
     mtlString = response;
-    
+
     log("mtl file loaded: $URL");
-    
+
     log("parsing mtl file: $URL");
-    
+
     ParseMtlBenchmark.main(); // run benchmark
   }
 
   log("loading mtl file: $URL");
-  
+
   var file = new File(URL);
   Future<String> finishedReading = file.readAsString(encoding: ASCII);
   finishedReading.then(done);
@@ -69,12 +70,12 @@ void fetchObj(String oURL, String mURL) {
     fetchMtl(mURL);
 
     log("parsing obj file: $oURL");
-    
-    ParseObjBenchmark.main(); // run benchmark    
+
+    ParseObjBenchmark.main(); // run benchmark
   }
 
   log("loading obj file: $oURL");
-  
+
   var file = new File(oURL);
   Future<String> finishedReading = file.readAsString(encoding: ASCII);
   finishedReading.then(done);
@@ -84,9 +85,9 @@ void loadMtl(String URL) {
   void done(String response) {
     mtlURL = URL;
     mtlString = response;
-    
+
     log("parsing mtl: $URL");
-    
+
     ParseMtlBenchmark.main(); // run benchmark
   }
 
@@ -97,12 +98,12 @@ void loadObj(String URL) {
   void done(String response) {
     objURL = URL;
     objString = response;
-    
+
     loadMtl("mustang_impala.mtl");
-    
+
     log("parsing obj: $URL");
-    
-    ParseObjBenchmark.main(); // run benchmark    
+
+    ParseObjBenchmark.main(); // run benchmark
   }
 
   done(MUSTANG_OBJ_STR);
@@ -111,5 +112,6 @@ void loadObj(String URL) {
 void main() {
   log("current directory: ${Directory.current}");
   loadObj("mustang_impala.obj"); // loadObj: hard-coded obj
-  fetchObj("benchmark/house.obj", "benchmark/house.mtl"); // fetchOBJ: grab obj from file
+  fetchObj("benchmark/house.obj",
+      "benchmark/house.mtl"); // fetchOBJ: grab obj from file
 }

@@ -13,7 +13,6 @@ class Part {
 RegExp _BLANK = new RegExp(r"\s+");
 
 class Obj {
-
   static final String prefix_mtllib = "mtllib ";
   static final String prefix_usemtl = "usemtl ";
   static final int prefix_mtllib_len = prefix_mtllib.length;
@@ -43,14 +42,15 @@ class Obj {
     emptyList.forEach((String name) => _partTable.remove(name)); // remove selected keys
     */
 
-    _partTable.keys.where((name) { // where: filter keys
+    _partTable.keys.where((name) {
+      // where: filter keys
       bool empty = _partTable[name].indexListSize < 1;
       if (empty) {
         //print("OBJ: deleting empty object=$name loaded from url=$url");
       }
       return empty;
     }).toList() // create a copy to avoid concurrent modifications
-    .forEach(_partTable.remove); // remove selected keys
+        .forEach(_partTable.remove); // remove selected keys
 
     /*
     Iterable<String> keys = _partTable.keys;
@@ -70,8 +70,9 @@ class Obj {
     */
   }
 
-  Obj.fromString(String url, String str, {bool printStats: false, bool debugPrintParts: false, String defaultName: null, bool debugPrintTrace: false, bool fillMissingTextCoord: false}) {
-
+  Obj.fromString(String url, String str, {bool printStats: false,
+      bool debugPrintParts: false, String defaultName: null,
+      bool debugPrintTrace: false, bool fillMissingTextCoord: false}) {
     Map<String, int> indexTable = new Map<String, int>();
     List<double> _vertCoord = new List<double>();
     List<double> _textCoord = new List<double>();
@@ -99,7 +100,8 @@ class Obj {
       if (line.startsWith(prefix_mtllib)) {
         String new_mtllib = line.substring(prefix_mtllib_len);
         if (mtllib != null) {
-          print("OBJ: mtllib redefinition: from mtllib=$mtllib to mtllib=$new_mtllib");
+          print(
+              "OBJ: mtllib redefinition: from mtllib=$mtllib to mtllib=$new_mtllib");
         }
         mtllib = new_mtllib;
         return;
@@ -140,7 +142,8 @@ class Obj {
         if (defaultName != null) {
           _setCurrentObject(defaultName, lineNum, url, line);
         } else {
-          print("OBJ: non-object pattern at line=$lineNum from url=$url: [$line]");
+          print(
+              "OBJ: non-object pattern at line=$lineNum from url=$url: [$line]");
         }
         return;
       }
@@ -196,7 +199,8 @@ class Obj {
           double w = double.parse(t[3]);
 
           if (w != 0.0) {
-            print("OBJ: non-zero third texture coordinate: $w at line=$lineNum from url=$url: [$line]");
+            print(
+                "OBJ: non-zero third texture coordinate: $w at line=$lineNum from url=$url: [$line]");
             return;
           }
 
@@ -204,7 +208,8 @@ class Obj {
           _textCoord.add(v); // v
           return;
         }
-        print("OBJ: wrong number of texture coordinates: ${t.length - 1} at line=$lineNum from url=$url: [$line]");
+        print(
+            "OBJ: wrong number of texture coordinates: ${t.length - 1} at line=$lineNum from url=$url: [$line]");
         return;
       }
 
@@ -212,7 +217,8 @@ class Obj {
         // normal
         List<String> n = line.split(_BLANK);
         if (n.length != 4) {
-          print("OBJ: wrong number of normal coordinates (${n.length - 1} != 3) at line=$lineNum from url=$url: [$line]");
+          print(
+              "OBJ: wrong number of normal coordinates (${n.length - 1} != 3) at line=$lineNum from url=$url: [$line]");
           return;
         }
         _normCoord.add(double.parse(n[1])); // x
@@ -235,19 +241,18 @@ class Obj {
           }
 
           List<String> v = ind.split('/');
-          
+
           int solveRelativeIndex(int index, int tupleSize, int arraySize) {
             int offset;
-            
+
             if (index > 0) {
               // positive index
               offset = tupleSize * (index - 1);
-            }
-            else {
+            } else {
               // negative index (starts from end)
               offset = arraySize + tupleSize * index;
             }
-            
+
             return offset;
           }
 
@@ -278,7 +283,7 @@ class Obj {
             String ni = v[2];
             if (ni != null && !ni.isEmpty) {
               int nIndex = int.parse(ni);
-              int nOffset = solveRelativeIndex(nIndex, 3, _normCoord.length);              
+              int nOffset = solveRelativeIndex(nIndex, 3, _normCoord.length);
               normCoord.add(_normCoord[nOffset + 0]); // x
               normCoord.add(_normCoord[nOffset + 1]); // y
               normCoord.add(_normCoord[nOffset + 2]); // z
@@ -316,7 +321,8 @@ class Obj {
           return;
         }
 
-        print("OBJ: wrong number of face indices ${f.length - 1} at line=$lineNum from url=$url: [$line]");
+        print(
+            "OBJ: wrong number of face indices ${f.length - 1} at line=$lineNum from url=$url: [$line]");
 
         return;
       }
@@ -367,10 +373,10 @@ class Obj {
           return;
         }
 
-        print("OBJ: wrong number of vertex coordinates: ${v.length - 1} at line=$lineNum from url=$url: [$line]");
+        print(
+            "OBJ: wrong number of vertex coordinates: ${v.length - 1} at line=$lineNum from url=$url: [$line]");
         return;
       }
-
     }
 
     List<String> lines = str.split('\n');
@@ -392,7 +398,8 @@ class Obj {
     if (textCoord.length < textCoordNeeded) {
       textCoordFound = false; // mark real texture coordinates as missing
       if (fillMissingTextCoord) {
-        print("OBJ: FIXME: url=$url adding ${textCoordNeeded - textCoord.length} virtual texture coordinates");
+        print(
+            "OBJ: FIXME: url=$url adding ${textCoordNeeded - textCoord.length} virtual texture coordinates");
         while (textCoord.length < textCoordNeeded) {
           textCoord.add(0.0); // u
           textCoord.add(0.0); // v
@@ -404,12 +411,15 @@ class Obj {
       print("Obj.fromString: URL=$url vertices = $indexCounter");
       print("Obj.fromString: URL=$url indices.length = ${indices.length}");
       print("Obj.fromString: URL=$url textCoordFound = $textCoordFound");
-      print("Obj.fromString: URL=$url textCoord.length = ${textCoord.length} (2 * $indexCounter)");
-      print("Obj.fromString: URL=$url normCoord.length = ${normCoord.length} (3 * $indexCounter)");
+      print(
+          "Obj.fromString: URL=$url textCoord.length = ${textCoord.length} (2 * $indexCounter)");
+      print(
+          "Obj.fromString: URL=$url normCoord.length = ${normCoord.length} (3 * $indexCounter)");
 
       int maxIndices = 100;
 
-      print("Obj.fromString: URL=$url printing arrays only for objects with less than $maxIndices indices");
+      print(
+          "Obj.fromString: URL=$url printing arrays only for objects with less than $maxIndices indices");
 
       if (indices.length < maxIndices) {
         print("Obj.fromString: URL=$url indices = ${indices}");
@@ -423,15 +433,14 @@ class Obj {
 
     if (debugPrintParts) {
       _partTable.values.forEach((Part pa) {
-        print("Obj.fromString: URL=$url part=${pa.name} offset=${pa.indexFirst} size=${pa.indexListSize}");
+        print(
+            "Obj.fromString: URL=$url part=${pa.name} offset=${pa.indexFirst} size=${pa.indexListSize}");
       });
     }
-
   }
 }
 
 class Material {
-
   static final String prefix_newmtl = "newmtl ";
   static final String prefix_map_Kd = "map_Kd ";
   static final int prefix_newmtl_len = prefix_newmtl.length;
@@ -443,14 +452,16 @@ class Material {
   Material(this.name);
 }
 
-typedef void field_parser(String field, String param, String line, int lineNum, String url);
+typedef void field_parser(
+    String field, String param, String line, int lineNum, String url);
 
-Map<String, Material> mtllib_parse(String str, String url, {printUnknownFields: true, bool debugPrintTrace: false}}) {
-
+Map<String, Material> mtllib_parse(String str, String url,
+    {printUnknownFields: true, bool debugPrintTrace: false}) {
   Map<String, Material> lib = new Map<String, Material>();
   Material currMaterial;
 
-  void _parse_newmtl(String field, String param, String line, int lineNum, String url) {
+  void _parse_newmtl(
+      String field, String param, String line, int lineNum, String url) {
     String mtl = param;
     currMaterial = lib[mtl];
     if (currMaterial == null) {
@@ -462,19 +473,23 @@ Map<String, Material> mtllib_parse(String str, String url, {printUnknownFields: 
     }
   }
 
-  void _parse_map_Kd(String field, String param, String line, int lineNum, String url) {
+  void _parse_map_Kd(
+      String field, String param, String line, int lineNum, String url) {
     String map_Kd = param;
     if (currMaterial == null) {
-      print("mtllib_parse: url=$url: line=$lineNum: map_Kd=$map_Kd found for undefined material: [$line]");
+      print(
+          "mtllib_parse: url=$url: line=$lineNum: map_Kd=$map_Kd found for undefined material: [$line]");
       return;
     }
     currMaterial.map_Kd = map_Kd;
   }
 
-  void _parse_Kd(String field, String param, String line, int lineNum, String url) {
+  void _parse_Kd(
+      String field, String param, String line, int lineNum, String url) {
     String Kd = param;
     if (currMaterial == null) {
-      print("mtllib_parse: url=$url: line=$lineNum: Kd=$Kd found for undefined material: [$line]");
+      print(
+          "mtllib_parse: url=$url: line=$lineNum: Kd=$Kd found for undefined material: [$line]");
       return;
     }
     List<String> rgb = Kd.split(_BLANK);
@@ -483,8 +498,8 @@ Map<String, Material> mtllib_parse(String str, String url, {printUnknownFields: 
     currMaterial.Kd[2] = double.parse(rgb[2]);
   }
 
-  void _parse_noop(String field, String param, String line, int lineNum, String url) {
-  }
+  void _parse_noop(
+      String field, String param, String line, int lineNum, String url) {}
 
   final Map<String, field_parser> parserTable = {
     "newmtl": _parse_newmtl,
@@ -516,7 +531,8 @@ Map<String, Material> mtllib_parse(String str, String url, {printUnknownFields: 
 
     int paramIndex = line.indexOf(' ');
     if (paramIndex < 1) {
-      print("mtllib_parse: space separator not found on line=$lineNum from url=$url: [$line]");
+      print(
+          "mtllib_parse: space separator not found on line=$lineNum from url=$url: [$line]");
       return;
     }
 
@@ -525,7 +541,8 @@ Map<String, Material> mtllib_parse(String str, String url, {printUnknownFields: 
     field_parser parser = parserTable[field];
     if (parser == null) {
       if (printUnknownFields) {
-        print("mtllib_parse: unknown field=[$field] on line=$lineNum from url=$url: [$line]");
+        print(
+            "mtllib_parse: unknown field=[$field] on line=$lineNum from url=$url: [$line]");
       }
       return;
     }
