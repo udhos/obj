@@ -445,12 +445,12 @@ class Material {
 
 typedef void field_parser(String field, String param, String line, int lineNum, String url);
 
-Map<String, Material> mtllib_parse(String str, String url, {printUnknownFields: true}) {
+Map<String, Material> mtllib_parse(String str, String url, {printUnknownFields: true, bool debugPrintTrace: false}}) {
 
   Map<String, Material> lib = new Map<String, Material>();
   Material currMaterial;
 
-  void _parse_newmtl(String field, String param, String line, int lineNum, String url, {bool debugPrintTrace: false}) {
+  void _parse_newmtl(String field, String param, String line, int lineNum, String url) {
     String mtl = param;
     currMaterial = lib[mtl];
     if (currMaterial == null) {
