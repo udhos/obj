@@ -403,7 +403,6 @@ class Obj {
     if (printStats) {
       print("Obj.fromString: URL=$url vertices = $indexCounter");
       print("Obj.fromString: URL=$url indices.length = ${indices.length}");
-      print("Obj.fromString: URL=$url indices.length = ${indices.length}");
       print("Obj.fromString: URL=$url textCoordFound = $textCoordFound");
       print("Obj.fromString: URL=$url textCoord.length = ${textCoord.length} (2 * $indexCounter)");
       print("Obj.fromString: URL=$url normCoord.length = ${normCoord.length} (3 * $indexCounter)");
