@@ -1,0 +1,48 @@
+# cube.obj
+
+mtllib cube.mtl
+
+o cube
+
+## comment-begin ##
+
+# This is a multiline commented-out section.
+# Notice this section is enclosed between "## comment-begin ##" and "## comment-end ##". 
+# This section is fully ignored by this specific OBJ parser.
+This uncommented line should cause error on common OBJ parsers.
+
+## comment-end ##
+
+# This is a regular section, processed under usual OBJ specification.
+
+# square bottom
+v -1 -1 -1
+v -1 -1 1
+v 1 -1 1
+v 1 -1 -1
+
+# square top
+v -1 1 -1
+v -1 1 1
+v 1 1 1
+v 1 1 -1
+
+# face down
+f -6 -7 -8
+f -8 -5 -6
+
+# face up
+f -1 -4 -3
+f -3 -2 -1 
+
+# face right
+# face left
+# face front
+# face back
+
+## end-of-file ##
+
+# This is an after-eof section.
+# Notice this section follows the marker "## end-of-file ##".
+# This section is fully ignored by this specific OBJ parser.
+This uncommented line should cause error on common OBJ parsers.

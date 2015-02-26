@@ -55,7 +55,7 @@ void fetchMtl(String URL) {
 
   log("loading mtl file: $URL");
 
-  var file = new File(URL);
+  File file = new File(URL);
   Future<String> finishedReading = file.readAsString(encoding: ASCII);
   finishedReading.then(done);
 }
@@ -76,7 +76,7 @@ void fetchObj(String oURL, String mURL) {
 
   log("loading obj file: $oURL");
 
-  var file = new File(oURL);
+  File file = new File(oURL);
   Future<String> finishedReading = file.readAsString(encoding: ASCII);
   finishedReading.then(done);
 }

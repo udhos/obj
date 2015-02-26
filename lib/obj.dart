@@ -267,7 +267,7 @@ class Obj {
             currObj.indexListSize++;
             return;
           }
-
+          
           List<String> v = ind.split('/');
 
           int solveRelativeIndex(int index, int tupleSize, int arraySize) {
