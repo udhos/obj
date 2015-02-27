@@ -38,7 +38,13 @@ f -1 -4 -3
 f -3 -2 -1 
 
 # face right
+f -5 -1 -2
+f -2 -6 -5
+
 # face left
+f -7 -3 -4
+f -4 -8 -7
+
 # face front
 # face back
 

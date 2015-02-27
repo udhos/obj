@@ -11,7 +11,7 @@ void main() {
 }
 
 void cube_test() {
-  obj_test("test/cube.obj", 8, 12);
+  obj_test("test/cube.obj", 8, 24);
   mtl_test("test/cube.mtl");
 }
 
@@ -74,4 +74,15 @@ void mtl_test(String materialPath) {
   test("mtllib_parse($materialPath): materials=$materialCount", () {
     expect(materialTable.length, materialCount);
   });
+  
+  String materialName = "cube_material";
+  test("mtllib_parse($materialPath): materialName=$materialName", () {
+    expect(materialTable.keys.first, materialName);
+  });
+  
+  String materialTexture = "cube.png";
+  test("mtllib_parse($materialPath): materialTexture=$materialTexture", () {
+    expect(materialTable[materialTable.keys.first].map_Kd, materialTexture);
+  });
+  
 }
