@@ -82,7 +82,7 @@ class Obj {
     Part currObj;
     String curr_usemtl;
     bool withinComment = false;
-    
+
     int vertLines = 0;
     int textLines = 0;
     int normLines = 0;
@@ -222,7 +222,7 @@ class Obj {
       if (line.startsWith("vt ")) {
         // texture coord
         ++textLines;
-        
+
         List<String> t = line.split(_BLANK);
         if (t.length == 3) {
           _textCoord.add(double.parse(t[1])); // u
@@ -252,7 +252,7 @@ class Obj {
       if (line.startsWith("vn ")) {
         // normal
         ++normLines;
-        
+
         List<String> n = line.split(_BLANK);
         if (n.length != 4) {
           print(
@@ -278,7 +278,7 @@ class Obj {
             currObj.indexListSize++;
             return;
           }
-          
+
           List<String> v = ind.split('/');
 
           int solveRelativeIndex(int index, int tupleSize, int arraySize) {
@@ -395,7 +395,7 @@ class Obj {
 
       if (line.startsWith("v ")) {
         ++vertLines;
-        
+
         // vertex coord
         List<String> v = line.split(_BLANK);
         if (v.length == 4) {
@@ -478,7 +478,8 @@ class Obj {
 
       int maxIndices = 100;
 
-      print("  Printing arrays only for objects with less than $maxIndices indices");
+      print(
+          "  Printing arrays only for objects with less than $maxIndices indices");
 
       if (indices.length < maxIndices) {
         print("    indices = ${indices}");
