@@ -1,0 +1,11 @@
+
+newmtl cube_material
+Ns 0
+Ka 0.0941176 0.0941176 0.0941176
+Kd 0.470588 0.470588 0.470588
+Ks 0 0 0
+map_Ka cube.png
+map_Kd cube.png
+illum 2
+# d 1
+# Tr 1

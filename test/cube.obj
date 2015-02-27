@@ -27,23 +27,34 @@ v -1 1 1
 v 1 1 1
 v 1 1 -1
 
+# uv coord
+
+# red
+vt 0.0 0.0
+
+# green
+vt 0.5 0.0
+
+# blue
+vt 1.0 0.0
+
 usemtl cube_material
 
 # face down
-f -6 -7 -8
-f -8 -5 -6
+f -6/-2 -7/-2 -8/-2
+f -8/-2 -5/-2 -6/-2
 
 # face up
-f -1 -4 -3
-f -3 -2 -1 
+f -1/-2 -4/-2 -3/-2
+f -3/-2 -2/-2 -1/-2 
 
 # face right
-f -5 -1 -2
-f -2 -6 -5
+f -5/-3 -1/-3 -2/-3
+f -2/-3 -6/-3 -5/-3
 
 # face left
-f -7 -3 -4
-f -4 -8 -7
+f -7/-3 -3/-3 -4/-3
+f -4/-3 -8/-3 -7/-3
 
 # face front
 # face back

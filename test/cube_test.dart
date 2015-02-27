@@ -11,7 +11,7 @@ void main() {
 }
 
 void cube_test() {
-  obj_test("test/cube.obj", 8, 24);
+  obj_test("test/cube.obj", 16, 24);
   mtl_test("test/cube.mtl");
 }
 
@@ -33,6 +33,12 @@ void obj_test(String objPath, int vertices, int indices) {
     expect(obj.vertCoord.length, vertCoord);
   });
 
+  int textCoord = 2 * vertices;
+
+  test("Obj.fromString($objPath): $textCoord texture coord", () {
+    expect(obj.textCoord.length, textCoord);
+  });
+  
   test("Obj.fromString($objPath): $indices indices", () {
     expect(obj.indices.length, indices);
   });

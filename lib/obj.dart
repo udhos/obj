@@ -276,6 +276,7 @@ class Obj {
           if (index != null) {
             indices.add(index);
             currObj.indexListSize++;
+            //print("known index=$ind indexCounter=$indexCounter currObj=${currObj.indexListSize} indexTable=${indexTable.length}");
             return;
           }
 
@@ -334,6 +335,7 @@ class Obj {
           currObj.indexListSize++;
           indexTable[ind] = indexCounter;
           ++indexCounter;
+          //print("new index=$ind indexCounter=$indexCounter currObj=${currObj.indexListSize} indexTable=${indexTable.length}");
         }
 
         List<String> f = line.split(_BLANK);
