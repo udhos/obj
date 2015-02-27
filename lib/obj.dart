@@ -82,6 +82,12 @@ class Obj {
     Part currObj;
     String curr_usemtl;
     bool withinComment = false;
+    
+    int vertLines = 0;
+    int textLines = 0;
+    int normLines = 0;
+    int faceLines = 0;
+    int triangles = 0;
 
     bool _isForcedCommentBegin(String line) {
       return line.startsWith("## comment-begin ##");
@@ -215,6 +221,8 @@ class Obj {
 
       if (line.startsWith("vt ")) {
         // texture coord
+        ++textLines;
+        
         List<String> t = line.split(_BLANK);
         if (t.length == 3) {
           _textCoord.add(double.parse(t[1])); // u
@@ -243,6 +251,8 @@ class Obj {
 
       if (line.startsWith("vn ")) {
         // normal
+        ++normLines;
+        
         List<String> n = line.split(_BLANK);
         if (n.length != 4) {
           print(
@@ -257,6 +267,7 @@ class Obj {
 
       if (line.startsWith("f ")) {
         // face
+        ++faceLines;
 
         void addVertex(String ind) {
 
@@ -329,6 +340,7 @@ class Obj {
 
         if (f.length == 4) {
           // triangle face: v0 v1 v2
+          ++triangles;
           for (int i = 1; i < f.length; ++i) {
             addVertex(f[i]);
           }
@@ -340,6 +352,7 @@ class Obj {
           // v0 v1 v2 v3 =>
           // v0 v1 v2
           // v2 v3 v0
+          triangles += 2;
           for (int i = 1; i < 4; ++i) {
             addVertex(f[i]);
           }
@@ -381,6 +394,8 @@ class Obj {
       if (_trimmedLineIsComment(line)) return false;
 
       if (line.startsWith("v ")) {
+        ++vertLines;
+        
         // vertex coord
         List<String> v = line.split(_BLANK);
         if (v.length == 4) {
@@ -447,27 +462,32 @@ class Obj {
     }
 
     if (printStats) {
-      print("Obj.fromString: URL=$url vertices = $indexCounter");
-      print("Obj.fromString: URL=$url indices.length = ${indices.length}");
-      print("Obj.fromString: URL=$url textCoordFound = $textCoordFound");
-      print(
-          "Obj.fromString: URL=$url textCoord.length = ${textCoord.length} (2 * $indexCounter)");
-      print(
-          "Obj.fromString: URL=$url normCoord.length = ${normCoord.length} (3 * $indexCounter)");
+      print("Stats for Obj.fromString: URL=$url");
+      print("  vert lines = $vertLines");
+      print("  face lines = $faceLines");
+      print("  text lines = $textLines");
+      print("  norm lines = $normLines");
+      print("  triangles = $triangles");
+      print("Result:");
+      print("  vertices = $indexCounter");
+      print("  indices.length = ${indices.length}");
+      print("  textCoordFound = $textCoordFound");
+      print("  vertCoord.length = ${vertCoord.length} (3 * $indexCounter)");
+      print("  textCoord.length = ${textCoord.length} (2 * $indexCounter)");
+      print("  normCoord.length = ${normCoord.length} (3 * $indexCounter)");
 
       int maxIndices = 100;
 
-      print(
-          "Obj.fromString: URL=$url printing arrays only for objects with less than $maxIndices indices");
+      print("  Printing arrays only for objects with less than $maxIndices indices");
 
       if (indices.length < maxIndices) {
-        print("Obj.fromString: URL=$url indices = ${indices}");
-        print("Obj.fromString: URL=$url vertCoord = ${vertCoord}");
-        print("Obj.fromString: URL=$url textCoord = ${textCoord}");
-        print("Obj.fromString: URL=$url normCoord = ${normCoord}");
+        print("    indices = ${indices}");
+        print("    vertCoord = ${vertCoord}");
+        print("    textCoord = ${textCoord}");
+        print("    normCoord = ${normCoord}");
       }
 
-      print("Obj.fromString: URL=$url parts = ${_partTable.length}");
+      print("  parts = ${_partTable.length}");
     }
 
     if (debugPrintParts) {
