@@ -11,7 +11,7 @@ void main() {
 }
 
 void cube_test() {
-  obj_test("test/cube.obj", 16, 24);
+  obj_test("test/cube.obj", 23, 36);
   mtl_test("test/cube.mtl");
 }
 
