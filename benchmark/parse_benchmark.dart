@@ -25,7 +25,7 @@ class ParseObjBenchmark extends BenchmarkBase {
 
   void run() {
     Obj obj = new Obj.fromString(objURL, objString,
-        defaultName: "noname", splitAtIndicesLimit: -1);
+        defaultName: "noname");
   }
 }
 

@@ -72,8 +72,7 @@ class Obj {
 
   Obj.fromString(String url, String str, {bool printStats: false,
       bool debugPrintParts: false, String defaultName: null,
-      bool debugPrintTrace: false, bool fillMissingTextCoord: false,
-      int splitAtIndicesLimit: 65535}) {
+      bool debugPrintTrace: false, bool fillMissingTextCoord: false}) {
     Map<String, int> indexTable = new Map<String, int>();
     List<double> _vertCoord = new List<double>();
     List<double> _textCoord = new List<double>();
@@ -249,16 +248,6 @@ class Obj {
       }
 
       void pushIndex(int index) {
-        if (splitAtIndicesLimit > 0) {
-          if (currObj.indexListSize >= splitAtIndicesLimit) {
-            String newName = "${currObj.name}_splitted$splitCount";
-            ++splitCount;
-            print(
-                "Obj.fromString: URL=$url splitting new part=$newName on index limit=$splitAtIndicesLimit at line=$lineNum: [$line]");
-            _setCurrentObject(newName, lineNum, url, line);
-          }
-        }
-
         indices.add(index);
         currObj.indexListSize++;
       }
