@@ -72,7 +72,8 @@ class Obj {
 
   Obj.fromString(String url, String str, {bool printStats: false,
       bool debugPrintParts: false, String defaultName: null,
-      bool debugPrintTrace: false, bool fillMissingTextCoord: false}) {
+      bool debugPrintTrace: false, bool fillMissingTextCoord: false,
+      int splitAtIndicesLimit: 65535}) {
     Map<String, int> indexTable = new Map<String, int>();
     List<double> _vertCoord = new List<double>();
     List<double> _textCoord = new List<double>();
@@ -88,6 +89,8 @@ class Obj {
     int normLines = 0;
     int faceLines = 0;
     int triangles = 0;
+
+    int splitCount = 0;
 
     bool _isForcedCommentBegin(String line) {
       return line.startsWith("## comment-begin ##");
@@ -245,40 +248,43 @@ class Obj {
         return false;
       }
 
+      void pushIndex(int index) {
+        if (splitAtIndicesLimit > 0) {
+          if (currObj.indexListSize >= splitAtIndicesLimit) {
+            String newName = "${currObj.name}_splitted$splitCount";
+            ++splitCount;
+            print(
+                "Obj.fromString: URL=$url splitting new part=$newName on index limit=$splitAtIndicesLimit at line=$lineNum: [$line]");
+            _setCurrentObject(newName, lineNum, url, line);
+          }
+        }
+
+        indices.add(index);
+        currObj.indexListSize++;
+      }
+
       if (line.startsWith("f ")) {
         // face
         ++faceLines;
 
         void addVertex(String ind) {
-
-          /*
-          // known unified index?
-          int index = indexTable[ind];
-          if (index != null) {
-            indices.add(index);
-            currObj.indexListSize++;
-            //print("known index=$ind indexCounter=$indexCounter currObj=${currObj.indexListSize} indexTable=${indexTable.length}");
-            return;
-          }
-           */
-                    
           List<String> v = ind.split('/');
-          
+
           int solveRelativeIndex(int index, int size) {
             assert(index != 0);
             assert(size >= 0);
-            
+
             if (index > 0) {
               return index - 1;
             }
-            
+
             return size + index;
           }
-          
+
           int tIndex;
-          int nIndex;          
+          int nIndex;
           String tIndexStr = "";
-          String nIndexStr = "";         
+          String nIndexStr = "";
 
           // coord index
           String vi = v[0];
@@ -304,39 +310,37 @@ class Obj {
               nIndexStr = nIndex.toString();
             }
           }
-          
+
           String absIndex = "$vIndex/$tIndexStr/$nIndexStr";
 
           // known unified index?
           int index = indexTable[absIndex];
           if (index != null) {
-            indices.add(index);
-            currObj.indexListSize++;
+            pushIndex(index);
             //print("known index=$ind indexCounter=$indexCounter currObj=${currObj.indexListSize} indexTable=${indexTable.length}");
             return;
           }
-          
+
           int vOffset = vIndex * 3;
           vertCoord.add(_vertCoord[vOffset + 0]); // x
           vertCoord.add(_vertCoord[vOffset + 1]); // y
           vertCoord.add(_vertCoord[vOffset + 2]); // z
-          
+
           if (tIndexStr.isNotEmpty) {
-          int tOffset = tIndex * 2;
-          textCoord.add(_textCoord[tOffset + 0]); // u
-          textCoord.add(_textCoord[tOffset + 1]); // v
+            int tOffset = tIndex * 2;
+            textCoord.add(_textCoord[tOffset + 0]); // u
+            textCoord.add(_textCoord[tOffset + 1]); // v
           }
 
           if (nIndexStr.isNotEmpty) {
-          int nOffset = nIndex * 3;
-          normCoord.add(_normCoord[nOffset + 0]); // x
-          normCoord.add(_normCoord[nOffset + 1]); // y
-          normCoord.add(_normCoord[nOffset + 2]); // z
+            int nOffset = nIndex * 3;
+            normCoord.add(_normCoord[nOffset + 0]); // x
+            normCoord.add(_normCoord[nOffset + 1]); // y
+            normCoord.add(_normCoord[nOffset + 2]); // z
           }
-          
+
           // add unified index
-          indices.add(indexCounter);
-          currObj.indexListSize++;
+          pushIndex(indexCounter);
           indexTable[absIndex] = indexCounter;
           ++indexCounter;
           //print("new index=$ind indexCounter=$indexCounter currObj=${currObj.indexListSize} indexTable=${indexTable.length}");
@@ -499,7 +503,8 @@ class Obj {
       print("Parts for Obj.fromString: URL=$url");
       int sizeSum = 0;
       _partTable.values.forEach((Part pa) {
-        print("  part=${pa.name} offset=${pa.indexFirst} size=${pa.indexListSize}");
+        print(
+            "  part=${pa.name} offset=${pa.indexFirst} size=${pa.indexListSize}");
         sizeSum += pa.indexListSize;
       });
       print("  Total index size: $sizeSum");

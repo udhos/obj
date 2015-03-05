@@ -39,7 +39,7 @@ void obj_test(String objPath, int vertices, int indices) {
   test("Obj.fromString($objPath): $textCoord texture coord", () {
     expect(obj.textCoord.length, textCoord);
   });
-  
+
   test("Obj.fromString($objPath): $indices indices", () {
     expect(obj.indices.length, indices);
   });
@@ -81,17 +81,16 @@ void mtl_test(String materialPath) {
   test("mtllib_parse($materialPath): materials=$materialCount", () {
     expect(materialTable.length, materialCount);
   });
-  
+
   String materialName = "cube_material";
   test("mtllib_parse($materialPath): materialName=$materialName", () {
     expect(materialTable.keys.first, materialName);
   });
-  
+
   String materialTexture = "cube.png";
   test("mtllib_parse($materialPath): materialTexture=$materialTexture", () {
     expect(materialTable[materialTable.keys.first].map_Kd, materialTexture);
   });
-  
 }
 
 void relative_test() {
@@ -133,9 +132,27 @@ f -6 -5 -4
   test("Obj.fromString($objPath): indices", () {
     expect(obj.indices, [0, 1, 2, 0, 1, 2, 3, 4, 5, 3, 4, 5, 0, 1, 2, 0, 1, 2]);
   });
-  
+
   test("Obj.fromString($objPath): vertCoord", () {
-    expect(obj.vertCoord, [1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 3.0, 3.0, 3.0, 4.0, 4.0, 4.0, 5.0, 5.0, 5.0, 6.0, 6.0, 6.0]);
+    expect(obj.vertCoord, [
+      1.0,
+      1.0,
+      1.0,
+      2.0,
+      2.0,
+      2.0,
+      3.0,
+      3.0,
+      3.0,
+      4.0,
+      4.0,
+      4.0,
+      5.0,
+      5.0,
+      5.0,
+      6.0,
+      6.0,
+      6.0
+    ]);
   });
-  
 }
