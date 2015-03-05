@@ -192,29 +192,9 @@ class Obj {
         return false;
       }
 
-      /*
       if (line.startsWith("v ")) {
-        // vertex coord
-        List<String> v = line.split(_BLANK);
-        if (v.length == 4) {
-          _vertCoord.add(double.parse(v[1])); // x
-          _vertCoord.add(double.parse(v[2])); // y
-          _vertCoord.add(double.parse(v[3])); // z
-          return;
-        }
-        if (v.length == 5) {
-          double w = double.parse(v[4]);
-          _vertCoord.add(double.parse(v[1]) / w); // x
-          _vertCoord.add(double.parse(v[2]) / w); // y
-          _vertCoord.add(double.parse(v[3]) / w); // z
-          return;
-        }
+        ++vertLines;
 
-        print("OBJ: wrong number of vertex coordinates: ${v.length - 1} at line=$lineNum from url=$url: [$line]");
-        return;
-      }
-       */
-      if (line.startsWith("v ")) {
         // vertex coord
         return false;
       }
@@ -271,6 +251,7 @@ class Obj {
 
         void addVertex(String ind) {
 
+          /*
           // known unified index?
           int index = indexTable[ind];
           if (index != null) {
@@ -279,42 +260,38 @@ class Obj {
             //print("known index=$ind indexCounter=$indexCounter currObj=${currObj.indexListSize} indexTable=${indexTable.length}");
             return;
           }
-
+           */
+                    
           List<String> v = ind.split('/');
-
-          int solveRelativeIndex(int index, int tupleSize, int arraySize) {
-            int offset;
-
+          
+          int solveRelativeIndex(int index, int size) {
+            assert(index != 0);
+            assert(size >= 0);
+            
             if (index > 0) {
-              // positive index
-              offset = tupleSize * (index - 1);
-            } else {
-              // negative index (starts from end)
-              offset = arraySize + tupleSize * index;
+              return index - 1;
             }
-
-            return offset;
+            
+            return size + index;
           }
+          
+          int tIndex;
+          int nIndex;          
+          String tIndexStr = "";
+          String nIndexStr = "";         
 
           // coord index
           String vi = v[0];
           int vIndex = int.parse(vi);
-          int vOffset = solveRelativeIndex(vIndex, 3, _vertCoord.length);
-
-          //print("addVertex: ind=[$ind] vOffset=$vOffset\n");
-
-          vertCoord.add(_vertCoord[vOffset + 0]); // x
-          vertCoord.add(_vertCoord[vOffset + 1]); // y
-          vertCoord.add(_vertCoord[vOffset + 2]); // z
+          vIndex = solveRelativeIndex(vIndex, vertLines);
 
           if (v.length > 1) {
             // texture index?
             String ti = v[1];
             if (ti != null && !ti.isEmpty) {
-              int tIndex = int.parse(ti);
-              int tOffset = solveRelativeIndex(tIndex, 2, _textCoord.length);
-              textCoord.add(_textCoord[tOffset + 0]); // u
-              textCoord.add(_textCoord[tOffset + 1]); // v
+              tIndex = int.parse(ti);
+              tIndex = solveRelativeIndex(tIndex, textLines);
+              tIndexStr = tIndex.toString();
             }
           }
 
@@ -322,18 +299,45 @@ class Obj {
             // normal index?
             String ni = v[2];
             if (ni != null && !ni.isEmpty) {
-              int nIndex = int.parse(ni);
-              int nOffset = solveRelativeIndex(nIndex, 3, _normCoord.length);
-              normCoord.add(_normCoord[nOffset + 0]); // x
-              normCoord.add(_normCoord[nOffset + 1]); // y
-              normCoord.add(_normCoord[nOffset + 2]); // z
+              nIndex = int.parse(ni);
+              nIndex = solveRelativeIndex(nIndex, normLines);
+              nIndexStr = nIndex.toString();
             }
           }
+          
+          String absIndex = "$vIndex/$tIndexStr/$nIndexStr";
 
+          // known unified index?
+          int index = indexTable[absIndex];
+          if (index != null) {
+            indices.add(index);
+            currObj.indexListSize++;
+            //print("known index=$ind indexCounter=$indexCounter currObj=${currObj.indexListSize} indexTable=${indexTable.length}");
+            return;
+          }
+          
+          int vOffset = vIndex * 3;
+          vertCoord.add(_vertCoord[vOffset + 0]); // x
+          vertCoord.add(_vertCoord[vOffset + 1]); // y
+          vertCoord.add(_vertCoord[vOffset + 2]); // z
+          
+          if (tIndexStr.isNotEmpty) {
+          int tOffset = tIndex * 2;
+          textCoord.add(_textCoord[tOffset + 0]); // u
+          textCoord.add(_textCoord[tOffset + 1]); // v
+          }
+
+          if (nIndexStr.isNotEmpty) {
+          int nOffset = nIndex * 3;
+          normCoord.add(_normCoord[nOffset + 0]); // x
+          normCoord.add(_normCoord[nOffset + 1]); // y
+          normCoord.add(_normCoord[nOffset + 2]); // z
+          }
+          
           // add unified index
           indices.add(indexCounter);
           currObj.indexListSize++;
-          indexTable[ind] = indexCounter;
+          indexTable[absIndex] = indexCounter;
           ++indexCounter;
           //print("new index=$ind indexCounter=$indexCounter currObj=${currObj.indexListSize} indexTable=${indexTable.length}");
         }
@@ -396,8 +400,6 @@ class Obj {
       if (_trimmedLineIsComment(line)) return false;
 
       if (line.startsWith("v ")) {
-        ++vertLines;
-
         // vertex coord
         List<String> v = line.split(_BLANK);
         if (v.length == 4) {
@@ -494,10 +496,13 @@ class Obj {
     }
 
     if (debugPrintParts) {
+      print("Parts for Obj.fromString: URL=$url");
+      int sizeSum = 0;
       _partTable.values.forEach((Part pa) {
-        print(
-            "Obj.fromString: URL=$url part=${pa.name} offset=${pa.indexFirst} size=${pa.indexListSize}");
+        print("  part=${pa.name} offset=${pa.indexFirst} size=${pa.indexListSize}");
+        sizeSum += pa.indexListSize;
       });
+      print("  Total index size: $sizeSum");
     }
   }
 }
