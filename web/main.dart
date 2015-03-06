@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:stats/stats.dart';
 import 'package:vector_math/vector_math.dart';
 import 'package:game_loop/game_loop_html.dart';
+import 'package:obj/obj.dart';
 
 final String vertexShaderSource = """
 attribute vec3 a_Position;
@@ -90,8 +91,49 @@ void run() {
   gameLoop.onRender = ((gLoop) {
     render(gl, gLoop);
   });
+  
+  log("starting game loop");
+  
+  fetchObj("old_house.obj");
+  fetchObj("house.obj");
  
   gameLoop.start();
+}
+
+void fetchObj(String objURL) {
+  
+  void handleObjResponse(String objString) {
+
+    log("OBJ loaded from URL=$objURL");
+    
+    Obj obj = new Obj.fromString(objURL, objString,
+        defaultName: "noname",
+        fillMissingTextCoord: true,
+        printStats: true,
+        debugPrintParts: true);
+    
+    String mtlURL = obj.mtllib;
+
+    void handleMtlResponse(String mtlString) {
+      
+      log("MTL loaded from URL=$mtlURL");
+      
+      Map<String, Material> lib = mtllib_parse(mtlString, mtlURL);      
+    }
+
+    void handleMtlError(Object err) {
+      log("failure fetching MTL from URL=$mtlURL: $err");
+    }
+    
+    HttpRequest.getString(mtlURL).then(handleMtlResponse).catchError(handleMtlError);
+    
+  }
+
+  void handleObjError(Object err) {
+    log("failure fetching OBJ from URL=$objURL: $err");
+  }
+
+  HttpRequest.getString(objURL).then(handleObjResponse).catchError(handleObjError);  
 }
 
 void log(String msg) {
