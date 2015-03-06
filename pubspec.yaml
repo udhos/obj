@@ -7,3 +7,10 @@ dev_dependencies:
   unittest: any    
 dependencies:
   benchmark_harness: any
+  browser: any 
+  game_loop:
+    git: https://github.com/johnmccutchan/game_loop.git
+  stats: any
+  vector_math:
+    git: https://github.com/udhos/vector_math.git
+  
