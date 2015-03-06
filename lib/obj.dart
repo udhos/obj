@@ -23,6 +23,7 @@ class Obj {
   Iterable<Part> get partList => _partTable.values;
 
   bool textCoordFound = true;
+  bool bigIndexFound = false;
   List<double> vertCoord = new List<double>();
   List<double> textCoord = new List<double>();
   List<double> normCoord = new List<double>();
@@ -248,6 +249,9 @@ class Obj {
       }
 
       void pushIndex(int index) {
+        if (index > 65535) {
+          bigIndexFound = true;
+        }
         indices.add(index);
         currObj.indexListSize++;
       }
@@ -469,6 +473,7 @@ class Obj {
       print("  vertices = $indexCounter");
       print("  indices.length = ${indices.length}");
       print("  textCoordFound = $textCoordFound");
+      print("  bigIndexFound = $bigIndexFound");
       print("  vertCoord.length = ${vertCoord.length} (3 * $indexCounter)");
       print("  textCoord.length = ${textCoord.length} (2 * $indexCounter)");
       print("  normCoord.length = ${normCoord.length} (3 * $indexCounter)");
