@@ -32,6 +32,7 @@ void main() {
 """;
 
 Stats stats;
+bool ext_element_uint = false;
 
 void main() {
   log("main: begin");
@@ -81,6 +82,10 @@ void run() {
   gl.depthRange(0.0, 1.0);                 // default
   gl.viewport(0, 0, canvas.width, canvas.height);
   
+  updateCulling(gl, true);
+  
+  detect_element_uint(gl);
+  
   GameLoopHtml gameLoop = new GameLoopHtml(gl.canvas);
 
   gameLoop.pointerLock.lockOnClick = false; // disable pointer lock
@@ -100,6 +105,44 @@ void run() {
   gameLoop.start();
 }
 
+void updateCulling(RenderingContext gl, bool culling) {
+  if (culling) {
+    log("backface culling: ON");
+
+    gl.frontFace(RenderingContext.CCW);
+    gl.cullFace(RenderingContext.BACK);
+    gl.enable(RenderingContext.CULL_FACE);
+    return;
+  }
+
+  log("backface culling: OFF");
+  gl.disable(RenderingContext.CULL_FACE);
+}
+
+int get ext_get_element_type {
+  if (ext_element_uint) {
+    return RenderingContext.UNSIGNED_INT;
+  }
+
+  return RenderingContext.UNSIGNED_SHORT;
+}
+
+void detect_element_uint(RenderingContext gl) {
+  String extName = "OES_element_index_uint";
+  OesElementIndexUint ext;
+
+  try {
+    ext = gl.getExtension(extName);
+  } catch (exc) {
+    log("gl.getExtension('$extName') exception: $exc");
+  }
+
+  ext_element_uint = ext != null;
+
+  log("gl.getExtension('$extName'): available = $ext_element_uint");
+}
+
+
 void fetchObj(String objURL) {
   
   void handleObjResponse(String objString) {
@@ -109,8 +152,7 @@ void fetchObj(String objURL) {
     Obj obj = new Obj.fromString(objURL, objString,
         defaultName: "noname",
         fillMissingTextCoord: true,
-        printStats: true,
-        debugPrintParts: true);
+        printStats: true);
     
     String mtlURL = obj.mtllib;
 
