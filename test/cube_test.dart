@@ -9,6 +9,7 @@ import 'package:obj/obj.dart';
 void main() {
   cube_test();
   relative_test();
+  forward_vertices_test();
 }
 
 void cube_test() {
@@ -153,6 +154,48 @@ f -6 -5 -4
       6.0,
       6.0,
       6.0
+    ]);
+  });
+}
+
+void forward_vertices_test() {
+  String objPath = "forward_vertices_test";
+  String objString = """
+o forward_vertices_test
+
+# face pointing to forward vertex definitions
+# support for this isn't usual in OBJ parsers
+# since it requires multiple passes
+# but currently we do support this layout
+f 1 2 3
+
+v 1 1 1
+v 2 2 2
+v 3 3 3
+""";
+
+  Obj obj = new Obj.fromString(objPath, objString,
+      printStats: true, debugPrintParts: true, debugPrintTrace: true);
+
+  test("Obj.fromString($objPath): non-null", () {
+    expect(obj != null, isTrue);
+  });
+
+  test("Obj.fromString($objPath): indices", () {
+    expect(obj.indices, [0, 1, 2]);
+  });
+
+  test("Obj.fromString($objPath): vertCoord", () {
+    expect(obj.vertCoord, [
+      1.0,
+      1.0,
+      1.0,
+      2.0,
+      2.0,
+      2.0,
+      3.0,
+      3.0,
+      3.0
     ]);
   });
 }
