@@ -30,7 +30,7 @@ class Obj {
   List<int> indices = new List<int>();
   String mtllib;
 
-  void trimTable(String url) {
+  int trimTable(String url) {
     // remove empty objects from _partTable
     /*
     List<String> emptyList = new List<String>(); // create a copy to avoid concurrent modifications
@@ -42,11 +42,14 @@ class Obj {
     });
     emptyList.forEach((String name) => _partTable.remove(name)); // remove selected keys
     */
+    
+    int deleteCount = 0;
 
     _partTable.keys.where((name) {
       // where: filter keys
       bool empty = _partTable[name].indexListSize < 1;
       if (empty) {
+        ++deleteCount;
         //print("OBJ: deleting empty object=$name loaded from url=$url");
       }
       return empty;
@@ -69,6 +72,8 @@ class Obj {
     copy.forEach(_partTable.remove);
     print("DEBUG got result");
     */
+    
+    return deleteCount;
   }
 
   Obj.fromString(String url, String str, {bool printStats: false,
@@ -446,7 +451,7 @@ class Obj {
 
     //print("Obj.fromString: url=$url: lines=${lines.length}");
 
-    trimTable(url); // remove empty objects from _partTable
+    int deleteCount = trimTable(url); // remove empty objects from _partTable  
 
     // FIXME
     int textCoordNeeded = indexCounter * 2;
@@ -490,7 +495,7 @@ class Obj {
         print("    normCoord = ${normCoord}");
       }
 
-      print("  parts = ${_partTable.length}");
+      print("  parts = ${_partTable.length} [after removal of $deleteCount empty part(s)]");
     }
 
     if (debugPrintParts) {
